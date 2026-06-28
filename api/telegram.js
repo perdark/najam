@@ -81,7 +81,7 @@ async function onCallback(cq) {
     return edit(chatId, msgId, statsText(c), backKeyboard());
   }
   if (data.startsWith("latest:")) {
-    const slugPart = data.split(":")[1]; // all | photographer | florist | callcenter
+    const slugPart = data.split(":")[1]; // all | photographer | florist | callcenter | graphic | hr
     const slug = slugPart === "all" ? undefined : slugPart;
     const apps = await latest(8, slug);
     return edit(chatId, msgId, listText(apps, slugPart), listKeyboard(apps, slugPart));
@@ -114,6 +114,10 @@ function mainKeyboard() {
         { text: "💐 الزهور", callback_data: "latest:florist" },
         { text: "💬 الكول سنتر", callback_data: "latest:callcenter" },
       ],
+      [
+        { text: "🎨 الجرافيك", callback_data: "latest:graphic" },
+        { text: "👥 الموارد البشرية", callback_data: "latest:hr" },
+      ],
       [{ text: "🔄 تحديث", callback_data: "menu" }],
     ],
   };
@@ -125,7 +129,9 @@ function statsText(c) {
     `الإجمالي: <b>${c.total}</b>\n\n` +
     `📸 مصورة هاتف: <b>${c.photographer}</b>\n` +
     `💐 منسقة زهور: <b>${c.florist}</b>\n` +
-    `💬 كول سنتر: <b>${c.callcenter}</b>` +
+    `💬 كول سنتر: <b>${c.callcenter}</b>\n` +
+    `🎨 تصميم جرافيك: <b>${c.graphic}</b>\n` +
+    `👥 موارد بشرية: <b>${c.hr}</b>` +
     (c.other ? `\n• أخرى: <b>${c.other}</b>` : "")
   );
 }

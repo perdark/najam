@@ -430,6 +430,30 @@ section { position: relative; }
 .role-apply:hover { border-color: var(--mauve); }
 .role-apply:hover::after { transform: translateX(-4px); }
 
+/* ---------- Availability badges (للبنات / للجميع) ---------- */
+.role-badge, .pick-badge {
+  display: inline-block;
+  font-family: "Tajawal", sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  letter-spacing: 0.01em;
+}
+.role-badge { font-size: 0.74rem; padding: 6px 12px; margin-bottom: 14px; }
+.pick-badge { font-size: 0.66rem; padding: 4px 10px; }
+.role-badge--girls, .pick-badge--girls {
+  color: var(--mauve-deep);
+  background: var(--mauve-tint);
+  border-color: var(--mauve-soft);
+}
+.role-badge--all, .pick-badge--all {
+  color: var(--gold-deep);
+  background: #fdf3df;
+  border-color: var(--gold-soft);
+}
+
 /* ---------- Apply / wizard ---------- */
 .apply-head { margin-bottom: 30px; }
 .wizard {
@@ -580,8 +604,10 @@ input:focus, textarea:focus {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px 14px;
   padding: 20px 22px;
+  padding-inline-end: 54px; /* reserve room for the selected ✓ badge */
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   background: #fff;

@@ -9,6 +9,12 @@
 //   BLOB_READ_WRITE_TOKEN   (auto-added when the Blob store was linked)
 import { saveApplication } from "../lib/store.js";
 
+const GIRLS_ONLY_ROLES = new Set([
+  "مصورة هاتف",
+  "منسقة زهور",
+  "كول سنتر وإدارة الحجوزات",
+]);
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -42,6 +48,13 @@ export default async function handler(req, res) {
   }
   if (answers.length === 0 || answers.length > 60) {
     return res.status(400).json({ ok: false, error: "بيانات غير صالحة" });
+  }
+  const gender = meta.gender || answers.find((a) => a?.q === "الجنس")?.a || "";
+  if (gender === "ذكر" && meta.roles.some((role) => GIRLS_ONLY_ROLES.has(role))) {
+    return res.status(400).json({
+      ok: false,
+      error: "هذه الوظيفة مخصصة للبنات فقط. للشباب متاح التقديم على تصميم الجرافيك أو الموارد البشرية.",
+    });
   }
 
   const text = buildMessage(meta, answers);

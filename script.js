@@ -117,9 +117,12 @@ const STEP_LABELS = {
   florist: "منسقة الزهور",
   photographer: "مصورة الهاتف",
   callcenter: "الكول سنتر",
+  graphic: "تصميم الجرافيك",
+  hr: "الموارد البشرية",
   commitment: "الالتزام والعمل",
   closing: "اللمسة الأخيرة",
 };
+const GIRLS_ONLY_ROLES = new Set(["photographer", "florist", "callcenter"]);
 
 // Arabic-Indic digits for the counter (feels native)
 const toAr = (n) => String(n).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
@@ -212,6 +215,17 @@ function validateStep(key) {
     } else if (field) clearError(field);
   });
 
+  if (key === "basic") {
+    const gender = form.querySelector('input[name="الجنس"]:checked')?.value || "";
+    const blocked = gender === "ذكر" && selectedRoles().some((role) => GIRLS_ONLY_ROLES.has(role));
+    const err = stepEl.querySelector('[data-error="role-gender"]');
+    if (err) err.classList.toggle("show", blocked);
+    if (blocked) {
+      ok = false;
+      if (!firstBad) firstBad = err;
+    }
+  }
+
   if (firstBad && firstBad.scrollIntoView) {
     firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -234,6 +248,10 @@ form.addEventListener("change", (e) => {
   if (e.target.name === "roles") {
     const err = form.querySelector('[data-error="roles"]');
     if (err && selectedRoles().length) err.classList.remove("show");
+  }
+  if (e.target.name === "الجنس" || e.target.name === "roles") {
+    const err = form.querySelector('[data-error="role-gender"]');
+    if (err) err.classList.remove("show");
   }
 });
 
@@ -292,7 +310,13 @@ function collectData() {
 
   const roles = selectedRoles().map(
     (r) =>
-      ({ photographer: "مصورة هاتف", florist: "منسقة زهور", callcenter: "كول سنتر وإدارة الحجوزات" }[r])
+      ({
+        photographer: "مصورة هاتف",
+        florist: "منسقة زهور",
+        callcenter: "كول سنتر وإدارة الحجوزات",
+        graphic: "تصميم جرافيك",
+        hr: "موارد بشرية",
+      }[r])
   );
 
   const get = (n) => {
@@ -306,6 +330,7 @@ function collectData() {
       phone: get("رقم الهاتف / واتساب"),
       city: get("المدينة / المنطقة"),
       age: get("العمر"),
+      gender: get("الجنس"),
       roles,
     },
     answers,
