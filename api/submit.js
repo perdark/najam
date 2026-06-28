@@ -1,10 +1,13 @@
-// Vercel Serverless Function — forwards the application to a Telegram bot.
+// Vercel Serverless Function — forwards the application to a Telegram bot
+// and stores it in the private Blob store so the bot dashboard can list it.
 // The bot token NEVER reaches the browser; it lives only in env vars here.
 //
 // Required env vars (set in Vercel → Project → Settings → Environment Variables,
 // and in .env.local for `vercel dev`):
 //   TELEGRAM_BOT_TOKEN   e.g. 123456:ABC-DEF...
 //   TELEGRAM_CHAT_ID     the chat/group id that should receive applications
+//   BLOB_READ_WRITE_TOKEN   (auto-added when the Blob store was linked)
+import { saveApplication } from "../lib/store.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -59,6 +62,14 @@ export default async function handler(req, res) {
     if (!tgRes.ok || !tgData.ok) {
       console.error("Telegram error:", tgData);
       return res.status(502).json({ ok: false, error: "تعذّر الإرسال للتلكرام" });
+    }
+
+    // Persist for the dashboard (best-effort — never block the applicant on it).
+    try {
+      const rand = Math.random().toString(36).slice(2, 8);
+      await saveApplication({ meta, answers, submittedAt: new Date().toISOString() }, rand);
+    } catch (e) {
+      console.error("blob save error:", e);
     }
 
     return res.status(200).json({ ok: true });
