@@ -671,9 +671,12 @@ input:focus, textarea:focus {
   color: transparent;
 }
 
-/* ---------- Reveal on scroll ---------- */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-.reveal.in { opacity: 1; transform: translateY(0); }
+/* ---------- Reveal on scroll ----------
+   Content is visible by default. Only when JS is running (html.js) do we
+   hide it to animate it in — so a blocked/slow script never blanks the page. */
+.reveal { transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.js .reveal { opacity: 0; transform: translateY(28px); }
+.js .reveal.in { opacity: 1; transform: translateY(0); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 560px) {
@@ -691,5 +694,5 @@ input:focus, textarea:focus {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal { opacity: 1; transform: none; }
+  .reveal, .js .reveal { opacity: 1 !important; transform: none !important; }
 }

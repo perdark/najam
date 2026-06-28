@@ -38,19 +38,43 @@ const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 24);
 onScroll();
 window.addEventListener("scroll", onScroll, { passive: true });
 
-/* ---------- Reveal on scroll ---------- */
-const io = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) {
-        e.target.classList.add("in");
-        io.unobserve(e.target);
-      }
+/* ---------- Reveal on scroll (enhancement only — never hides content for good) ---------- */
+(function setupReveal() {
+  const reveals = document.querySelectorAll(".reveal");
+  const show = (el) => el.classList.add("in");
+  const reduce =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // No IO support or reduced motion → just show everything, no animation.
+  if (reduce || !("IntersectionObserver" in window)) {
+    reveals.forEach(show);
+    return;
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          show(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: "0px 0px -8% 0px" }
+  );
+  reveals.forEach((el) => io.observe(el));
+
+  // Reveal anything already on screen right away (don't wait for async callback).
+  const showInView = () =>
+    reveals.forEach((el) => {
+      if (el.getBoundingClientRect().top < window.innerHeight * 1.05) show(el);
     });
-  },
-  { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-);
-document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  showInView();
+  window.addEventListener("load", showInView);
+
+  // Hard safety net: if the observer never fires for any reason, content still appears.
+  setTimeout(() => reveals.forEach(show), 2500);
+})();
 
 /* ---------- Footer year ---------- */
 document.getElementById("year").textContent = new Date().getFullYear();
