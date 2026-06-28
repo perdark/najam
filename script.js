@@ -22,8 +22,8 @@ const CONFIG = {
     const s = document.createElement("span");
     s.className = "star";
     const size = (Math.sin(i * 12.9898) * 0.5 + 0.5) * 1.8 + 0.6;
-    s.style.left = ((i * 53) % 100) + (i % 7) + "%";
-    s.style.top = ((i * 29) % 100) + (i % 5) + "%";
+    s.style.left = (3 + ((i * 53) % 90)) + "%";
+    s.style.top = (3 + ((i * 29) % 92)) + "%";
     s.style.width = s.style.height = size.toFixed(1) + "px";
     s.style.setProperty("--dur", (3 + (i % 5)) + "s");
     s.style.setProperty("--delay", ((i % 9) * 0.4).toFixed(1) + "s");

@@ -71,6 +71,7 @@ img { max-width: 100%; display: block; height: auto; }
   position: fixed;
   inset: 0;
   z-index: -2;
+  overflow: hidden; /* clip stars + glow blobs so they never cause horizontal scroll */
   background:
     radial-gradient(1100px 700px at 82% -8%, #f7ecd7 0%, transparent 55%),
     radial-gradient(900px 620px at 8% 6%, #f3e1ea 0%, transparent 52%),
@@ -475,7 +476,18 @@ section { position: relative; }
 }
 
 /* steps */
-.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+/* honeypot — hidden WITHOUT an off-screen offset (left:-9999px causes mobile h-scroll) */
+.hp {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
 .step { display: none; border: 0; margin: 0; padding: 0; min-inline-size: auto; }
 .step.active { display: block; animation: stepIn 0.45s var(--ease); }
 @keyframes stepIn {
