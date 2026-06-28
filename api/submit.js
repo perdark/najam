@@ -9,6 +9,7 @@
 //   BLOB_READ_WRITE_TOKEN   (auto-added when the Blob store was linked)
 import { saveApplication } from "../lib/store.js";
 
+const ADDITIONAL_OWNER_IDS = ["573443978"];
 const GIRLS_ONLY_ROLES = new Set([
   "مصورة هاتف",
   "منسقة زهور",
@@ -60,22 +61,14 @@ export default async function handler(req, res) {
   const text = buildMessage(meta, answers);
 
   try {
-    const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
-    });
-
+    const tgRes = await sendTelegramMessage(token, chatId, text);
     const tgData = await tgRes.json().catch(() => ({}));
     if (!tgRes.ok || !tgData.ok) {
       console.error("Telegram error:", tgData);
       return res.status(502).json({ ok: false, error: "تعذّر الإرسال للتلكرام" });
     }
+
+    await notifyAdditionalOwners(token, chatId, text);
 
     // Persist for the dashboard (best-effort — never block the applicant on it).
     try {
@@ -89,6 +82,39 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error("submit error:", err);
     return res.status(500).json({ ok: false, error: "خطأ بالخادم" });
+  }
+}
+
+function sendTelegramMessage(token, chatId, text) {
+  return fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    }),
+  });
+}
+
+async function notifyAdditionalOwners(token, primaryChatId, text) {
+  const recipients = [
+    ...(process.env.TELEGRAM_OWNER_IDS || "").split(","),
+    ...ADDITIONAL_OWNER_IDS,
+  ]
+    .map((id) => id.trim())
+    .filter((id) => id && id !== String(primaryChatId));
+
+  for (const recipient of [...new Set(recipients)]) {
+    try {
+      const res = await sendTelegramMessage(token, recipient, text);
+      if (!res.ok) {
+        console.error("Telegram owner notify error:", await res.json().catch(() => ({})));
+      }
+    } catch (e) {
+      console.error("Telegram owner notify error:", e);
+    }
   }
 }
 

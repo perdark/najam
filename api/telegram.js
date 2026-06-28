@@ -6,6 +6,8 @@
 //      BLOB_READ_WRITE_TOKEN.
 import { counts, latest, readApp, SLUG_LABEL } from "../lib/store.js";
 
+const ADDITIONAL_OWNER_IDS = ["573443978"];
+
 const API = (m) => `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${m}`;
 const tg = (method, body) =>
   fetch(API(method), {
@@ -15,8 +17,10 @@ const tg = (method, body) =>
   });
 
 const owners = () =>
-  (process.env.TELEGRAM_OWNER_IDS || process.env.TELEGRAM_CHAT_ID || "")
-    .split(",")
+  [
+    ...(process.env.TELEGRAM_OWNER_IDS || process.env.TELEGRAM_CHAT_ID || "").split(","),
+    ...ADDITIONAL_OWNER_IDS,
+  ]
     .map((s) => s.trim())
     .filter(Boolean);
 const isOwner = (id) => owners().includes(String(id));
