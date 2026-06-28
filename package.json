@@ -1,0 +1,11 @@
+{
+  "name": "najma-recruitment",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "موقع توظيف فريق نجمة وكمر — استمارة ترسل النتائج إلى بوت تلكرام",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}
